@@ -5,13 +5,9 @@ logging:
     security: DEBUG
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb
-    username: sa
-    password: sa
-    driver-class-name: org.h2.Driver
+    url: jdbc:postgresql://localhost:5432/udp
+    username: udp
+    password: udp
+    driver-class-name: org.postgresql.Driver
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-#    driver-class-name: org.postgresql.Driver
-#    url: jdbc:postgresql://localhost:5432/udp
-#    username: udp
-#    password: udp
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
