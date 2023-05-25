@@ -10,4 +10,6 @@ spring:
     password: udp
     driver-class-name: org.postgresql.Driver
   jpa:
+    hibernate:
+      ddl-auto: update
     database-platform: org.hibernate.dialect.PostgreSQLDialect
