@@ -14,4 +14,13 @@ public class HomeController {
     public String index() {
         return "Index page";
     }
+    @GetMapping("/admin")
+    public String admin() {
+        return "admin whatsup";
+    }
+
+    @GetMapping("/user")
+    public String user() {
+        return "user whatsup";
+    }
 }
