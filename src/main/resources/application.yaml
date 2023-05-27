@@ -3,7 +3,13 @@ server:
 logging:
   level:
     security: DEBUG
+
 spring:
+  ldap:
+    embedded:
+      port: 8389
+      ldif: classpath:ldap-data.ldif #ldif ldap file where ldap instance
+      base-dn: dc=springframework,dc=org #base dn
   datasource:
     url: jdbc:h2:mem:testdb
     username: sa
