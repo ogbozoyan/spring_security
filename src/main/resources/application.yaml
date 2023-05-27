@@ -4,6 +4,13 @@ logging:
   level:
     security: DEBUG
 spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            clientId: ${GITHUB_CLIENTID}
+            clientSecret: ${GITHUB_SECRET}
   datasource:
     url: jdbc:h2:mem:testdb
     username: sa
