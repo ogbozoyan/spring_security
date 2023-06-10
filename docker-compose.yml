@@ -1,15 +1,51 @@
-version: '3.8'
-services:
-  db:
-    image: postgres:14.1-alpine
-    restart: always
-    environment:
-      - POSTGRES_USER=udp
-      - POSTGRES_PASSWORD=udp
-    ports:
-      - '5432:5432'
-    volumes:
-      - db:/var/lib/postgresql/data
-volumes:
-  db:
-    driver: local
+  version: '3.9'
+
+  services:
+    postgres:
+      image: postgres:latest
+      container_name: bitnami_postgresql
+      ports:
+        - 5432:5432
+      environment:
+        - POSTGRES_USER=udp
+        - POSTGRES_PASSWORD=udp
+        - POSTGRES_DB=keycloak_db
+      volumes:
+        - postgresql_data:/var/lib/bitnami_postgresql/data
+      restart: unless-stopped
+      networks:
+        - backend
+
+    keycloak:
+      image: bitnami/keycloak:latest
+      container_name: bitnami_keycloak
+      environment:
+        - KEYCLOAK_HTTP_PORT=8080
+        - KEYCLOAK_CREATE_ADMIN_USER=true
+        - KEYCLOAK_ADMIN_USER=admin
+        - KEYCLOAK_ADMIN_PASSWORD=admin
+        - KEYCLOAK_DATABASE_HOST=postgres
+        - KEYCLOAK_DATABASE_PORT=5432
+        - KEYCLOAK_DATABASE_NAME=keycloak_db
+        - KEYCLOAK_DATABASE_USER=udp
+        - KEYCLOAK_DATABASE_PASSWORD=udp
+        - KEYCLOAK_DATABASE_SCHEMA=public
+      ports:
+        - '8080:8080'
+      depends_on:
+        postgres:
+          condition: service_started
+      volumes:
+        - bitnami_keycloak_v:/docker-entrypoint-initdb.d
+      networks:
+        - backend
+  
+  volumes:
+    postgresql_data:
+      driver: local
+    bitnami_keycloak_v:
+      driver: local
+
+  networks:
+    backend:
+      name: backend
