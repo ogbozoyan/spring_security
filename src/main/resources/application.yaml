@@ -1,9 +1,11 @@
 server:
-  port: 8080
+  port: 9000
 logging:
   level:
     security: DEBUG
 spring:
+  main:
+    allow-circular-references: true
   datasource:
     url: jdbc:postgresql://localhost:5432/keycloak_db
     username: udp
@@ -11,6 +13,12 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+keycloak:
+  auth-server-url: http://localhost:8080/ # URL of the Keycloak server
+  realm: test-realm
+  resource: test-client #client in keycloak
+  credentials:
+    secret: wREVcIQvOSPUbPfOIWNTGVpO3NITCZzL #secret of client
 ---
 spring:
   config:

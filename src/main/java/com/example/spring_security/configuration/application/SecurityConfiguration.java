@@ -1,56 +1,47 @@
 package com.example.spring_security.configuration.application;
 
+import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
+import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
+import org.keycloak.adapters.KeycloakConfigResolver;
+import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
+import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
-import javax.sql.DataSource;
+import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
+import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
+import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 
 /**
  * @author ogbozoyan
  * @date 25.05.2023
  */
-@EnableWebSecurity // tells this is to Spring Security configuration that take this class like a configuration
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
-    /* From Memory
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication()
-                .withUser("admin")
-                .password("admin")
-                .roles("ADMIN", "USER")
-                .and()
-                .withUser("user")
-                .password("user")
-                .roles("USER");
-    }*/
-
-    //From Database
+@KeycloakConfiguration
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter {
     @Autowired
-    DataSource dataSource;
-
+    // Меняем аутентификацию на keycloak
+    public void configureGlobal(AuthenticationManagerBuilder authenticationManagerBuilder) {
+        KeycloakAuthenticationProvider keycloakAuthenticationProvider = keycloakAuthenticationProvider();
+        keycloakAuthenticationProvider.setGrantedAuthoritiesMapper(new SimpleAuthorityMapper());
+        authenticationManagerBuilder.authenticationProvider(keycloakAuthenticationProvider);
+    }
+    @Bean
+    public KeycloakConfigResolver keycloakConfigurationResolver() {
+        return new KeycloakSpringBootConfigResolver();
+    }
     @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.jdbcAuthentication()
-                .dataSource(dataSource);
+    protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
+        return new NullAuthenticatedSessionStrategy();
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                .antMatchers("/admin").hasRole("ADMIN") // only admin can access to this page
-                .antMatchers("/user").hasAnyRole("USER", "ADMIN") // only user and admin can access to this page
-                .antMatchers("/").permitAll()
-                .and().formLogin();// everyone can access to this page
-    }
-
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance(); //Not recommended
+        super.configure(http);
+        http
+                .authorizeRequests()
+                .anyRequest().fullyAuthenticated();
     }
 }
